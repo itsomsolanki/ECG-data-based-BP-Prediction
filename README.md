@@ -15,9 +15,6 @@ Blood pressure (BP) is a key indicator of cardiovascular health. Traditional BP 
 
 The link between the electrical and mechanical activity of the heart, known as **Mechano-Electric Coupling (MEC)**, forms the theoretical foundation of this work.
 
-**Authors:** Rishav Kumar (B19ME066) & Om Solanki (B19CSE061)  
-**Mentor:** Dr. Binod Kumar
-
 ---
 
 ## 🎯 Problem Statement
