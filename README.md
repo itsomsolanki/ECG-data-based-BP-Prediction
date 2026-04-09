@@ -1,208 +1,159 @@
-# ECG Data-Based Blood Pressure Estimation
+# 🫀 ECG Data-Based Blood Pressure Estimation
 
-A machine learning project that estimates **Systolic Blood Pressure (SBP)** and **Diastolic Blood Pressure (DBP)** using **Electrocardiogram (ECG) signals**.  
-The project explores the **Mechano-Electric Coupling (MEC)** relationship between the electrical activity of the heart (ECG) and the mechanical activity responsible for blood pressure.
+> Estimating Systolic (SBP) and Diastolic (DBP) Blood Pressure from ECG signals using Machine Learning — built for wearable and resource-constrained devices.
 
-This approach enables **non-invasive blood pressure estimation** and can be integrated into **wearable healthcare monitoring devices**.
-
----
-
-## 📌 Project Overview
-
-Blood pressure is traditionally measured using cuff-based devices. However, continuous monitoring using such methods is inconvenient.
-
-This project proposes a **machine learning-based solution** that estimates blood pressure using **only ECG signals**, enabling potential integration with wearable ECG devices.
-
-The system performs:
-
-1. ECG signal preprocessing
-2. Feature extraction using R-peak detection
-3. Machine learning regression for BP prediction
-4. Classification into BP categories
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)
+![ML](https://img.shields.io/badge/ML-AdaBoost%20%7C%20ANN-orange)
+![Dataset](https://img.shields.io/badge/Dataset-MIMIC--II-green)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
 ---
 
-## 🎯 Objectives
+## 📌 Overview
 
-- Predict **Systolic Blood Pressure (SBP)** and **Diastolic Blood Pressure (DBP)** using ECG signals
-- Classify BP readings into:
-  - Normal
-  - Prehypertension
-  - Hypertension
-- Develop a **low-computation ML pipeline suitable for wearable devices**
+Blood pressure (BP) is a key indicator of cardiovascular health. Traditional BP monitoring is invasive or requires dedicated hardware. This project proposes a **non-invasive, ECG-only approach** to estimate BP using machine learning — making it suitable for integration into wearable devices.
+
+The link between the electrical and mechanical activity of the heart, known as **Mechano-Electric Coupling (MEC)**, forms the theoretical foundation of this work.
+
+**Authors:** Rishav Kumar (B19ME066) & Om Solanki (B19CSE061)  
+**Mentor:** Dr. Binod Kumar
 
 ---
 
-## 📊 Dataset
+## 🎯 Problem Statement
 
-The project uses the **MIMIC-II Waveform Dataset** from PhysioNet.
+Given raw ECG signal data, the goal is to:
 
-Key characteristics:
+1. **Estimate** Systolic Blood Pressure (SBP), Diastolic Blood Pressure (DBP), and Mean Arterial Pressure (MAP).
+2. **Classify** the reading into one of three categories:
 
-- Signals from **942 ICU patients**
-- Data collected between **2001–2008**
-- Sampling frequency: **125 Hz**
-- Includes synchronized:
-  - ECG signals
-  - Arterial Blood Pressure (ABP)
-  - Photoplethysmograph (PPG)
+| Category | SBP (mm Hg) | | DBP (mm Hg) |
+|---|---|---|---|
+| Normal | ≤ 90 or 90–120 | OR / AND | ≤ 60 or 60–79 |
+| Prehypertension | 120–140 | OR | 80–90 |
+| Hypertension | ≥ 140 (various sub-ranges) | OR / AND | ≥ 90 (various sub-ranges) |
 
-Signal segments with abnormal heart rates or discontinuities were removed to ensure data quality.
+---
+
+## 🗂️ Dataset
+
+**MIMIC-II** (Multi-Parameter Intelligent Monitoring in Intensive Care) — open-source dataset from [PhysioNet](https://physionet.org/).
+
+- **942 ICU patients**, data collected between 2001–2008
+- Sampling rate: **125 Hz**
+- Signals: Aorta Blood Pressure (ABP), ECG, Photoplethysmograph (PPG)
+- Pre-filtered to remove discontinuities and abnormal heart rate readings
+- No patient demographic data (age, sex) included
 
 ---
 
 ## ⚙️ Methodology
 
-### 1️⃣ Data Preprocessing
-
-- ECG signals divided into **4-second segments (500 samples)**
-- Applied **2nd-order Butterworth Bandpass Filter (0.1–50 Hz)** to remove noise
-- Detected **R-peaks using NeuroKit2 library**
-- Segments with fewer than **4 R-peaks** were discarded
-
----
-
-### 2️⃣ Signal Processing
-
-- Extracted ECG signals between **four consecutive R-peaks**
-- Segment lengths varied between **117–450 samples**
-- Used **FFT-based resampling** to normalize signal length to **120 samples**
-
----
-
-### 3️⃣ Machine Learning Models
-
-Two regression models were implemented:
-
-#### AdaBoost Regressor
-- Ensemble-based regression model
-- Uses multiple weak estimators (Decision Trees)
-- Improves prediction accuracy through boosting
-
-#### Artificial Neural Network (ANN)
-
-Architecture:
-
-Input Layer  
-Hidden Layer 1 – **1024 neurons**  
-Hidden Layer 2 – **512 neurons**  
-Hidden Layer 3 – **64 neurons**
-
-Additional details:
-
-- Activation: **ReLU**
-- Optimizer: **Adam**
-- Learning Rate: **0.01**
-- Dropout: **0.5 / 0.5 / 0.25**
-- Training epochs: **100**
-
----
-
-## 🧠 Approaches Implemented
-
-### Method 1 – Direct Regression
-
-- Train models directly on ECG features
-- Predict SBP and DBP values
-
-Two dataset variations:
-
-1. **Non-uniform R-peak spacing**
-2. **Uniform R-peak spacing (±10% threshold filtering)**
-
----
-
-### Method 2 – Classification + Regression
-
-1. First classify BP category:
-   - Normal
-   - Prehypertension
-   - Hypertension
-
-2. Apply regression models separately for each class to predict SBP and DBP.
-
-This approach achieved **lower prediction error**.
-
----
-
-## 📈 Results
-
-### Method 1 Results
-
-| Model | RMSE SBP | RMSE DBP |
-|------|------|------|
-| AdaBoost | 19.70 | 21.57 |
-| ANN | 15.18 | 9.09 |
-| ANN (Uniform Data) | **12.75** | **6.33** |
-
----
-
-### Method 2 Results (Best Results)
-
-| Class | Model | RMSE SBP | RMSE DBP |
-|------|------|------|------|
-| Normal | ANN | 12.46 | 4.67 |
-| Prehypertension | ANN | 10.74 | 8.13 |
-| Hypertension | ANN | 11.18 | 8.85 |
-
-The **classification + regression pipeline produced lower prediction errors** compared to direct regression.
-
----
-
-## 🧠 Technologies Used
-
-| Technology | Purpose |
-|------------|--------|
-| Python | Core programming language |
-| NumPy | Numerical computing |
-| Pandas | Data processing |
-| Scikit-learn | Machine learning models |
-| TensorFlow / Keras | ANN implementation |
-| NeuroKit2 | ECG signal processing |
-| SciPy | Signal filtering |
-| Matplotlib | Visualization |
-| FFT | Signal resampling |
-
----
-
-## 🏗 Project Workflow
+### Pipeline
 
 ```
-ECG Signal
-   │
-   ▼
-Signal Preprocessing (Filtering)
-   │
-   ▼
-R-Peak Detection
-   │
-   ▼
-Signal Segmentation
-   │
-   ▼
-Feature Extraction
-   │
-   ▼
-Machine Learning Model
-   │
-   ▼
-Blood Pressure Prediction
+Raw ECG (125 Hz)
+      │
+      ▼
+4-second segmentation (array length: 500)
+      │
+      ▼
+2nd-order Bandpass Butterworth Filter (0.1–50 Hz)
+      │
+      ▼
+R-peak Detection (neurokit2)  →  Remove segments with < 4 R-peaks
+      │
+      ▼
+Clip to 4 consecutive R-peaks  →  Resample to 120 samples (via FFT)
+      │
+      ▼
+Feature Extraction + (Optional) Classification
+      │
+      ▼
+Regression (AdaBoost / ANN)
+      │
+      ▼
+SBP, DBP, MAP
 ```
+
+### Method 1 — Direct Regression
+
+Train regressors directly on pre-processed ECG data.
+
+- **1a:** Use all preprocessed data (non-uniform R-peak spacing)
+- **1b:** Filter out samples with irregular R-peak intervals (±10% tolerance) for uniform spacing
+
+**Models used:**
+- AdaBoost Regressor (K-Fold CV, K=5; train-test split: 67/33)
+- ANN Regressor — 3 hidden layers (1024 → 512 → 64 neurons), ReLU activation, Adam optimizer (lr=0.01), Dropout (0.5, 0.5, 0.25), 100 epochs
+
+### Method 2 — Classify Then Regress
+
+1. Classify ECG segment into Normal / Prehypertension / Hypertension using an **XGBoost classifier** (built by a separate team)
+2. Route the segment to the corresponding class-specific regression model
+3. Predict SBP and DBP using ANN or AdaBoost
 
 ---
 
-## 🔬 Future Improvements
+## 📊 Results
 
-- Use **Deep Learning models (CNN / LSTM)** for ECG signal processing
-- Deploy the model on **edge devices or wearable health monitors**
-- Use larger biomedical datasets for improved generalization
-- Integrate **real-time BP monitoring applications**
+### Method 1
+
+| Data Type | Regressor | RMSE (SBP) | RMSE (DBP) |
+|---|---|---|---|
+| Non-Uniform | AdaBoost | 19.71 | 21.57 |
+| Non-Uniform | ANN | 15.19 | 9.10 |
+| Uniform | AdaBoost | 19.67 | 14.27 |
+| **Uniform** | **ANN** | **12.76** | **6.34** |
+
+### Method 2 (ANN, per class)
+
+| Class | RMSE (SBP) | RMSE (DBP) |
+|---|---|---|
+| Normal | 12.47 | 4.68 |
+| Prehypertension | 10.75 | 8.13 |
+| Hypertension | 11.19 | 8.86 |
+
+> ✅ **Method 2 with ANN yields the best overall performance**, particularly for DBP in the Normal class (RMSE: 4.68 mm Hg).
+
+---
+
+## 🧠 Model Architecture (ANN)
+
+```
+Input Layer  →  1024 neurons (ReLU) + Dropout(0.5)
+             →  512  neurons (ReLU) + Dropout(0.5)
+             →  64   neurons (ReLU) + Dropout(0.25)
+Output Layer →  1 neuron (Linear) — predicts SBP or DBP
+```
+
+- Optimizer: Adam (lr = 0.01)
+- Loss: MSE
+- Epochs: 100
+- Separate models trained for SBP and DBP
+
+---
+
+## 📈 Key Takeaways
+
+- **ANN outperforms AdaBoost** across nearly all configurations.
+- **Uniform R-peak spacing** (±10% filtering) improves model accuracy.
+- **Classify-then-regress (Method 2)** consistently beats direct regression, especially for DBP.
+- The approach is well-suited for **wearable devices** — no PPG or invasive sensors required.
 
 ---
 
 ## 📚 References
 
-1. PhysioNet MIMIC-II Dataset  
-2. Blood Pressure Estimation using ML (Research Papers)  
-3. ECG-Based Blood Pressure Estimation using Mechano-Electric Coupling  
+1. [ECG-Based BP Estimation — ArXiv](https://arxiv.org/ftp/arxiv/papers/2008/2008.10099.pdf)
+2. [Blood Pressure Dataset — Kaggle](https://www.kaggle.com/datasets/mkachuee/BloodPressureDataset/discussion)
+3. [Blood Pressure Analysis Notebook — Kaggle](https://www.kaggle.com/code/stephenmugisha/bloodpressure-analysis)
+4. Banerjee, S., Kumar, B., & Tripathi, J. N. — *Blood Pressure Estimation from ECG Data Using XGBoost and ANN for Wearable Devices*, IEEE.
+5. Mousavi, S. S., et al. — *ECG-Based Blood Pressure Estimation Using Mechano-Electric Coupling Concept*.
+6. [ANN Regression with TensorFlow — Analytics Vidhya](https://www.analyticsvidhya.com/blog/2021/08/a-walk-through-of-regression-analysis-using-artificial-neural-networks-in-tensorflow/)
 
+---
+
+## 📄 License
+
+This project is for academic purposes. Please cite appropriately if you use this work.
