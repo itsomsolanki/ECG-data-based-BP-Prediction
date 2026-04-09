@@ -1,54 +1,39 @@
-# ECG Data Based Blood Pressure Prediction
+# ECG Data-Based Blood Pressure Prediction
 
-A machine learning project that predicts **blood pressure (systolic and diastolic)** using **ECG (Electrocardiogram) signals**.  
-The goal of this project is to explore the feasibility of **non-invasive and cuff-less blood pressure estimation** using biomedical signal processing and machine learning techniques.
+A machine learning project that predicts **blood pressure (SBP and DBP)** directly from **ECG signals** using signal processing and regression models.  
+The project explores a **non-invasive approach for blood pressure estimation**, which can potentially be integrated into **wearable healthcare monitoring systems**.
 
 ---
 
 ## 📌 Project Overview
 
-Traditional blood pressure measurement requires a cuff-based device. This project explores a **data-driven approach to estimate blood pressure directly from ECG signals**.
+Blood pressure monitoring traditionally requires cuff-based devices.  
+This project investigates whether **ECG signals alone can be used to estimate blood pressure** by leveraging **machine learning models and biomedical signal processing techniques**.
 
-The system processes ECG waveform data, extracts meaningful physiological features, and trains machine learning models to predict blood pressure values.
+The approach is based on the **Mechano-Electric Coupling (MEC)** concept, which links the electrical activity of the heart (ECG) with its mechanical activity responsible for blood pressure.
 
-The pipeline includes:
+Using ECG waveform features and machine learning models, the system predicts:
 
-1. ECG signal preprocessing
-2. Feature extraction from waveform patterns
-3. Machine learning model training
-4. Prediction and evaluation
+- **Systolic Blood Pressure (SBP)**
+- **Diastolic Blood Pressure (DBP)**
+
+The predicted values can further be used to classify patients into:
+
+- Normal
+- Prehypertension
+- Hypertension
 
 ---
 
 ## 🚀 Key Features
 
-- Processed and analyzed **thousands of ECG signal samples**
-- Implemented **signal preprocessing techniques** including filtering, normalization, and segmentation
-- Extracted **multiple physiological features** from ECG waveforms
-- Built a **machine learning regression model** for blood pressure estimation
-- Achieved **~85–90% correlation between predicted and actual BP values**
-- Improved model performance through **feature engineering and hyperparameter tuning**
-- Implemented **data visualization for ECG signals and prediction analysis**
-
----
-
-## 🏗 System Architecture
-
-```
-ECG Data
-   │
-   ▼
-Signal Preprocessing
-   │
-   ▼
-Feature Extraction
-   │
-   ▼
-Machine Learning Model
-   │
-   ▼
-Blood Pressure Prediction
-```
+- Processed ECG signals from **900+ ICU patients** using the **MIMIC-II waveform dataset**
+- Segmented ECG signals into **4-second windows (500 samples each)**
+- Implemented **band-pass Butterworth filtering (0.1–50 Hz)** to remove noise
+- Extracted **R-peak features** from ECG signals using **NeuroKit2**
+- Developed regression models to predict **SBP and DBP**
+- Achieved **RMSE as low as 12.75 (SBP) and 6.33 (DBP)** using ANN regression
+- Applied **5-fold cross-validation** to evaluate model robustness
 
 ---
 
@@ -58,85 +43,141 @@ Blood Pressure Prediction
 |------------|--------|
 | **Python** | Core programming language |
 | **NumPy** | Numerical computations |
-| **Pandas** | Data manipulation and analysis |
-| **Scikit-learn** | Machine learning models and evaluation |
-| **SciPy** | Signal processing utilities |
+| **Pandas** | Data processing and analysis |
+| **Scikit-learn** | Machine learning models |
+| **TensorFlow / Keras** | Artificial Neural Network implementation |
+| **NeuroKit2** | ECG signal processing and R-peak detection |
+| **SciPy** | Signal filtering and FFT |
 | **Matplotlib / Seaborn** | Data visualization |
-| **Jupyter Notebook** | Experimentation and model development |
+| **Jupyter Notebook** | Model experimentation |
 
 ---
 
-## 📊 Machine Learning Workflow
+## 🏗 Project Workflow
+
+```
+ECG Dataset
+   │
+   ▼
+Signal Preprocessing
+(Band-pass filtering)
+   │
+   ▼
+Feature Extraction
+(R-peak detection)
+   │
+   ▼
+Dataset Segmentation
+(4-second signal windows)
+   │
+   ▼
+Machine Learning Models
+(AdaBoost & ANN Regression)
+   │
+   ▼
+SBP & DBP Prediction
+```
+
+---
+
+## 📊 Dataset
+
+The project uses the **MIMIC-II Waveform Dataset** containing:
+
+- ECG signals
+- Aortic Blood Pressure (ABP) signals
+- Photoplethysmograph (PPG) signals
+
+Dataset characteristics:
+
+- **942 ICU patients**
+- **125 Hz sampling rate**
+- Thousands of ECG signal recordings
+
+Each ECG signal segment is **filtered, normalized, and resampled before training the models**.
+
+---
+
+## ⚙️ Methodology
 
 ### 1️⃣ Data Preprocessing
-- Noise removal and signal filtering
-- ECG waveform normalization
-- Segmentation of ECG signals
+
+- ECG signals divided into **4-second segments**
+- Band-pass filtering using **Butterworth filter**
+- Removal of noisy signals and irregular samples
+
+---
 
 ### 2️⃣ Feature Extraction
-Extracted ECG-based features such as:
 
-- R-peak detection
-- RR intervals
-- Temporal waveform intervals
-- Signal morphology characteristics
+- **R-peak detection** from ECG signals
+- Distance between consecutive R-peaks
+- ECG waveform segment analysis
 
-### 3️⃣ Model Training
-Regression-based machine learning models were trained to predict:
+Signals were resampled to **120 samples per segment** using **Fast Fourier Transform (FFT)**.
 
-- **Systolic Blood Pressure**
-- **Diastolic Blood Pressure**
+---
 
-### 4️⃣ Model Evaluation
-Evaluation metrics included:
+### 3️⃣ Machine Learning Models
 
-- Mean Absolute Error (MAE)
-- Mean Squared Error (MSE)
-- Correlation between predicted and actual BP values
+Two models were implemented:
+
+#### AdaBoost Regressor
+
+Used for predicting SBP and DBP with ensemble learning.
+
+Results:
+
+| Metric | Value |
+|------|------|
+| RMSE (SBP) | ~19.66 |
+| RMSE (DBP) | ~14.26 |
+
+---
+
+#### Artificial Neural Network (ANN)
+
+Architecture:
+
+- 3 Hidden Layers
+- Neurons: **1024 → 512 → 64**
+- Activation: **ReLU**
+- Optimizer: **Adam**
+- Epochs: **100**
+
+Results:
+
+| Metric | Value |
+|------|------|
+| RMSE (SBP) | ~12.75 |
+| RMSE (DBP) | ~6.33 |
+
+---
+
+### 4️⃣ Classification + Regression Pipeline
+
+The system also categorizes blood pressure into:
+
+- **Normal**
+- **Prehypertension**
+- **Hypertension**
+
+Separate regression models are trained for each category to improve prediction accuracy.
 
 ---
 
 ## 📈 Results
 
-| Metric | Result |
-|------|------|
-| Prediction Accuracy | ~85–90% correlation |
-| Dataset Size | Thousands of ECG samples |
-| Model Type | Regression-based ML |
+| Model | RMSE (SBP) | RMSE (DBP) |
+|------|------------|------------|
+| AdaBoost | ~19.66 | ~14.26 |
+| ANN | ~12.75 | ~6.33 |
 
-The results demonstrate the potential of **ECG-based BP prediction for future wearable healthcare monitoring systems**.
-
----
-
-## 📂 Project Structure
-
-```
-ECG-data-based-BP-Prediction
-│
-├── data/
-│   ├── raw_ecg_data
-│   └── processed_data
-│
-├── notebooks/
-│   └── model_training.ipynb
-│
-├── src/
-│   ├── preprocessing.py
-│   ├── feature_extraction.py
-│   ├── model_training.py
-│   └── evaluation.py
-│
-├── results/
-│   ├── graphs
-│   └── model_outputs
-│
-├── requirements.txt
-└── README.md
-```
+ANN regression showed **significantly lower prediction error** compared to AdaBoost.
 
 ---
 
-## ⚙️ Installation
+## ▶️ Installation
 
 Clone the repository:
 
@@ -144,7 +185,7 @@ Clone the repository:
 git clone https://github.com/itsomsolanki/ECG-data-based-BP-Prediction.git
 ```
 
-Navigate to the project directory:
+Navigate to the project folder:
 
 ```bash
 cd ECG-data-based-BP-Prediction
@@ -160,13 +201,13 @@ pip install -r requirements.txt
 
 ## ▶️ Running the Project
 
-Run the training pipeline:
+Run the model training pipeline:
 
 ```bash
-python src/model_training.py
+python train_model.py
 ```
 
-Or open the Jupyter notebook:
+Or open the notebook:
 
 ```bash
 jupyter notebook
@@ -174,27 +215,22 @@ jupyter notebook
 
 ---
 
-## 📊 Example Visualization
+## 📊 Visualizations
 
-The project includes visualizations for:
+The project includes:
 
-- ECG waveform patterns
-- Feature distributions
+- ECG waveform visualization
+- Filtered vs original ECG signals
+- Training loss graphs
 - Prediction vs actual BP comparison
-- Model performance metrics
 
 ---
 
 ## 🔬 Future Improvements
 
-- Deep learning models (CNN / LSTM for ECG signal processing)
-- Larger biomedical datasets
-- Real-time prediction using wearable device signals
-- Integration with healthcare monitoring systems
-
----
-
-GitHub:  
-https://github.com/itsomsolanki
+- Implement **deep learning models (CNN/LSTM) for ECG signal learning**
+- Improve performance with **larger datasets**
+- Deploy the model for **real-time wearable device monitoring**
+- Build a **web interface for medical visualization**
 
 ---
